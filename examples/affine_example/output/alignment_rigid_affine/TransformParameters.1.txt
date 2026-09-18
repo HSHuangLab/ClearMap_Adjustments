@@ -1,0 +1,27 @@
+(CenterOfRotationPoint 89.3931413920626 84.48734072114652 25.959644479646343)
+(Direction 1 0 0 0 1 0 0 0 1)
+(FixedImageDimension 3)
+(FixedInternalImagePixelType "float")
+(HowToCombineTransforms "Compose")
+(Index 0 0 0)
+(InitialTransformParameterFileName "examples/affine_example/output/alignment_rigid_affine/TransformParameters.0.txt")
+(MovingImageDimension 3)
+(MovingInternalImagePixelType "float")
+(NumberOfParameters 12)
+(Origin 0 0 0)
+(Size 180 160 40)
+(Spacing 1 1 1)
+(Transform "AffineTransform")
+(TransformParameters 1.012111682258024 0.011457293656935572 -0.03242866699621782 0.02019563825687644 1.0213942504072038 -0.047967224184054774 -0.06271770180654011 -0.06504701452301714 1.1871648278957307 0.7043060760472246 0.934791809307472 -3.4503478788445543)
+(UseDirectionCosines "true")
+
+// ResampleInterpolator specific
+(FinalBSplineInterpolationOrder 1)
+(ResampleInterpolator "FinalBSplineInterpolator")
+
+// Resampler specific
+(CompressResultImage "false")
+(DefaultPixelValue 0)
+(Resampler "DefaultResampler")
+(ResultImageFormat "tif")
+(ResultImagePixelType "float")
