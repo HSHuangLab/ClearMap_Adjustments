@@ -1,7 +1,7 @@
 
-from examples.example_utils import load_synthetic_stack
+from Examples.example_utils import load_synthetic_stack
 from scipy.ndimage import affine_transform
-from examples.example_utils import plot_volume_3d
+from Examples.example_utils import plot_volume_3d
 from pathlib import Path
 
 import matplotlib.pyplot as plt

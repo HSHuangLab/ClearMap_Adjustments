@@ -4,7 +4,7 @@
 (MovingInternalImagePixelType "float")
 
 (Registration "MultiResolutionRegistration")
-(Transform "AffineTransform")
+(Transform "EulerTransform")
 (AutomaticScalesEstimation "true")
 (Metric "AdvancedMeanSquares")
 (Optimizer "AdaptiveStochasticGradientDescent")

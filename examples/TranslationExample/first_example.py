@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import tifffile
 import numpy as np
 
-from examples.example_utils import load_synthetic_stack, plot_volume_3d
+from Examples.example_utils import load_synthetic_stack, plot_volume_3d
 
 #all 40 slice images
 stack= load_synthetic_stack()

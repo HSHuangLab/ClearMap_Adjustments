@@ -3,7 +3,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import tifffile
 
-from examples.example_utils import plot_alignment
+from Examples.example_utils import plot_alignment
 
 # Locate this example's saved images.
 output_folder = Path(__file__).resolve().parent / "output"

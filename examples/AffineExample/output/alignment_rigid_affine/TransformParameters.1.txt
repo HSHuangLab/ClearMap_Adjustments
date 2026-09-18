@@ -4,7 +4,7 @@
 (FixedInternalImagePixelType "float")
 (HowToCombineTransforms "Compose")
 (Index 0 0 0)
-(InitialTransformParameterFileName "examples/affine_example/output/alignment_rigid_affine/TransformParameters.0.txt")
+(InitialTransformParameterFileName "/Users/danidubok/Documents/pythonProjects/ClearMap_Adjustments/Examples/AffineExample/output/alignment_rigid_affine/TransformParameters.0.txt")
 (MovingImageDimension 3)
 (MovingInternalImagePixelType "float")
 (NumberOfParameters 12)
