@@ -128,3 +128,35 @@ def plot_alignment(fixed, moving, aligned, z=19, percentile=99.5):
 
     fig3d.tight_layout()
     return fig2d, fig3d
+
+def mae (array1,array2):
+    return np.mean(np.abs(array1-array2))
+
+def ncc (array1,array2):
+    array1_centered = array1 - np.mean(array1)
+    array2_centered = array2 - np.mean(array2)
+
+    numerator = np.sum(array1_centered * array2_centered)
+
+    denominator = np.sqrt(
+        np.sum(array1_centered ** 2) *
+        np.sum(array2_centered ** 2)
+    )
+
+    return numerator / denominator
+
+def evaluate_alignment (fixed,moving,aligned):
+        mae_fixed_moving=mae(fixed,moving)
+        mae_fixed_aligned=mae(fixed,aligned)
+
+        ncc_fixed_moving=ncc(fixed,moving)
+        ncc_fixed_aligned=ncc(fixed,aligned)
+
+        return {
+    "mae_before": mae_fixed_moving,
+    "mae_after": mae_fixed_aligned,
+    "ncc_before": ncc_fixed_moving,
+    "ncc_after": ncc_fixed_aligned
+}
+
+
