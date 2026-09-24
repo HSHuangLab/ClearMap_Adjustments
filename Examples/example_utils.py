@@ -129,8 +129,28 @@ def plot_alignment(fixed, moving, aligned, z=19, percentile=99.5):
     fig3d.tight_layout()
     return fig2d, fig3d
 
+
+def inspect_volume(volume, name):
+    vol_shape= np.shape(volume)
+    vol_min,vol_max= np.min(volume),np.max(volume)
+    vol_mean=np.mean(volume)
+    vol_std= np.std(volume)
+    return {
+        "name": name,
+        "shape": vol_shape,
+        "min": vol_min,
+        "max": vol_max,
+        "mean": vol_mean,
+        "std": vol_std
+    }
+    
+
 def mae (array1,array2):
-    return np.mean(np.abs(array1-array2))
+    return np.mean(np.abs(array1.astype(float)-array2.astype(float)))
+
+def mse (array1,array2):
+    return np.mean((array1.astype(float)-array2.astype(float))**2)
+
 
 def ncc (array1,array2):
     array1_centered = array1 - np.mean(array1)
@@ -145,9 +165,21 @@ def ncc (array1,array2):
 
     return numerator / denominator
 
+def read_transform_parameters(file_path):
+    with open(file_path, "r") as file:
+        for line in file:
+            if line.startswith("(TransformParameters"):
+                values = line.strip("()\n").split()[1:]
+                return np.array(values, dtype=float)
+
+    raise ValueError("TransformParameters not found")
+
 def evaluate_alignment (fixed,moving,aligned):
         mae_fixed_moving=mae(fixed,moving)
         mae_fixed_aligned=mae(fixed,aligned)
+
+        mse_fixed_moving = mse(fixed, moving)
+        mse_fixed_aligned = mse(fixed, aligned)
 
         ncc_fixed_moving=ncc(fixed,moving)
         ncc_fixed_aligned=ncc(fixed,aligned)
@@ -155,6 +187,8 @@ def evaluate_alignment (fixed,moving,aligned):
         return {
     "mae_before": mae_fixed_moving,
     "mae_after": mae_fixed_aligned,
+    "mse_before": mse_fixed_moving,
+    "mse_after": mse_fixed_aligned,
     "ncc_before": ncc_fixed_moving,
     "ncc_after": ncc_fixed_aligned
 }
