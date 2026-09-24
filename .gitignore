@@ -18,3 +18,9 @@ Thumbs.db
 
 #
 .spyder*
+
+# Large microscopy data
+*.ims
+
+# Local Imaris data
+Examples/ImarisExample/data/
