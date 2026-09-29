@@ -4,73 +4,131 @@ from PySide6.QtWidgets import (
     QPushButton,
     QFileDialog,
     QLabel,
-    QComboBox)
+    QComboBox,
+    QMessageBox,
+    QVBoxLayout,
+    QHBoxLayout)
 from ims_utils import load_ims
 
+class ImagePanel(QWidget):
+    def __init__(self, title):
+        super().__init__()
 
-def main():
+        self.file_path = ""
+        self.volume= None
+        self.metadata= None
 
-    file_path = ""
+        self.layout= QVBoxLayout()
+        self.setLayout(self.layout)
 
+        self.title_label= QLabel(title)
+        self.layout.addWidget(self.title_label)
 
-    app = QApplication([])
+        self.browse_button = QPushButton("Browse")
+        self.layout.addWidget(self.browse_button)
 
-    window = QWidget()
-    window.setWindowTitle("Image Registration Tool")
-    window.resize(700, 500)
+        self.file_label = QLabel("No file selected")
+        self.layout.addWidget(self.file_label)
 
-    file_label = QLabel("No file selected", window)
-    file_label.move(20, 60)
-    file_label.resize(650, 30)
+        self.browse_button.clicked.connect(self.choose_file)
+        self.resolution_label = QLabel("Resolution Level:")
+        self.layout.addWidget(self.resolution_label)
+        self.resolution_box = QComboBox()
+        self.resolution_box.addItems(["0", "1", "2", "3", "4", "5", "6"])
+        self.resolution_box.setCurrentText("4")
+        self.layout.addWidget(self.resolution_box)
+    
+        self.channel_label = QLabel("Channel:")
+        self.layout.addWidget(self.channel_label)
+        self.channel_box = QComboBox()
+        self.channel_box.addItems(["0"])
+        self.layout.addWidget(self.channel_box)
+     
+        self.load_button = QPushButton("Load Image")
+        self.layout.addWidget(self.load_button)
+        self.load_button.clicked.connect(self.load_selected_image)
 
-    def choose_file():
-        
-        nonlocal file_path
+        self.info_label = QLabel("No image loaded")
+        self.layout.addWidget(self.info_label)
 
+    def choose_file(self):
         file_path, selected_filter = QFileDialog.getOpenFileName(
-            window,
+            self,
             "Choose an Imaris file",
             "",
             "Imaris files (*.ims)"
         )
 
         if file_path:
-            file_label.setText(file_path)
+            self.file_path = file_path
+            self.file_label.setText(file_path)
 
-    def load_selected_image():
-        if not file_path:
+    def load_selected_image(self):
+        if not self.file_path:
             return
+    
+        self.resolution = int(self.resolution_box.currentText())
+        self.channel = int(self.channel_box.currentText())
+    
+        try:
+            self.volume, self.metadata = load_ims(self.file_path,
+                                                   self.resolution,
+                                                   self.channel)
+            self.physical_size = self.metadata["physical_size_um"]
+            self.physical_size_mm = (
+            self.physical_size[0] / 1000,
+            self.physical_size[1] / 1000,
+            self.physical_size[2] / 1000
+            )
+    
+            self.info_label.setText(
+                "Loaded volume: " + str(self.volume.shape)+ " voxels"+
+                "\nVolume size: " + str(round(self.physical_size_mm[0], 2))+ " × "
+                + str(round(self.physical_size_mm[1], 2))
+                + " × "
+                + str(round(self.physical_size_mm[2], 2))
+                + " mm"
+                )
+    
+        except ValueError as error:
+            QMessageBox.warning(self,
+                "Image too large",
+                str(error) + "\nPlease select a lower resolution level."
+            )
+        
 
-        resolution = int(resolution_box.currentText())
-        channel = int(channel_box.currentText())
 
-        volume = load_ims(file_path, resolution, channel)
+def main():
 
-        print("Loaded volume:", volume.shape)
+    app = QApplication([])
 
-    browse_button = QPushButton("Browse", window)
-    browse_button.move(20, 20)
-    browse_button.clicked.connect(choose_file)
+    window = QWidget()
+    window.setWindowTitle("Image Registration Tool")
+    window.resize(900, 650)
 
-    resolution_label = QLabel("Resolution Level:", window)
-    resolution_label.move(20, 100)
+    main_layout= QVBoxLayout()
 
-    resolution_box = QComboBox(window)
-    resolution_box.addItems(["0", "1", "2", "3", "4", "5", "6"])
-    resolution_box.setCurrentText("4")
-    resolution_box.move(140, 95)
+    images_layout= QHBoxLayout()
 
-    channel_label = QLabel("Channel:", window)
-    channel_label.move(20, 140)
+    fixed= ImagePanel("IMAGE 1 - FIXED")
+    moving= ImagePanel("IMAGE 2 - MOVING")
 
-    channel_box = QComboBox(window)
-    channel_box.addItems(["0"])
-    channel_box.move(140, 135)
+    images_layout.addWidget(fixed)
+    images_layout.addWidget(moving)
 
-    load_button = QPushButton("Load Image", window)
-    load_button.move(20, 180)
-    load_button.clicked.connect(load_selected_image)
+    main_layout.addLayout(images_layout)
 
+    transform_label=QLabel("Transform Type:")
+    transform_box= QComboBox()
+    transform_box.addItems(["Translation","Rigid","Affine"])
+
+    main_layout.addWidget(transform_label)
+    main_layout.addWidget(transform_box)
+
+    reg_bottom=QPushButton("Run Registration")
+    main_layout.addWidget(reg_bottom)
+
+    window.setLayout(main_layout)
 
     window.show()
 
