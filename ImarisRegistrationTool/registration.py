@@ -2,6 +2,7 @@ from pathlib import Path
 import subprocess
 import tifffile
 from datetime import datetime
+import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ELASTIX_PATH = PROJECT_ROOT / "tools" / "elastix" / "bin" / "elastix"
