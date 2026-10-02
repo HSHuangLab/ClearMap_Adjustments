@@ -30,11 +30,26 @@ def load_synthetic_stack():
 
     return stack
 
-def plot_slice(volume, z):
-    fig, ax = plt.subplots()
-    ax.imshow(volume[z], cmap="gray")
-    ax.set_title(f"Slice at Z index {z}")
-    return fig
+def plot_slice(volume, z, physical_size_mm= None):
+        fig, ax = plt.subplots()
+
+        if physical_size_mm is not None:
+            x_mm, y_mm, _ = physical_size_mm
+
+            ax.imshow(
+                volume[z],
+                cmap="gray",
+                extent=[0, x_mm, y_mm, 0]
+            )
+
+            ax.set_xlabel("X [mm]")
+            ax.set_ylabel("Y [mm]")
+
+        else:
+            ax.imshow(volume[z], cmap="gray")
+
+        ax.set_title(f"Z slice {z}")
+        return fig
 
 def plot_volume_3d(volume, percentile=99.5, comparison=None,
                    title="Bright voxels in 3D"):

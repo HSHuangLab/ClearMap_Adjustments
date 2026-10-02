@@ -1,0 +1,28 @@
+(FixedImageDimension 3)
+(MovingImageDimension 3)
+(FixedInternalImagePixelType "float")
+(MovingInternalImagePixelType "float")
+
+(Registration "MultiResolutionRegistration")
+(Transform "TranslationTransform")
+(Metric "AdvancedMeanSquares")
+(Optimizer "AdaptiveStochasticGradientDescent")
+
+(FixedImagePyramid "FixedRecursiveImagePyramid")
+(MovingImagePyramid "MovingRecursiveImagePyramid")
+(NumberOfResolutions 3)
+
+(ImageSampler "Full")
+(AutomaticParameterEstimation "true")
+(MaximumNumberOfIterations 256)
+
+(Interpolator "BSplineInterpolator")
+(BSplineInterpolationOrder 1)
+(Resampler "DefaultResampler")
+(ResampleInterpolator "FinalBSplineInterpolator")
+(FinalBSplineInterpolationOrder 1)
+
+(DefaultPixelValue 0)
+(WriteResultImage "true")
+(ResultImageFormat "tif")
+(ResultImagePixelType "float")

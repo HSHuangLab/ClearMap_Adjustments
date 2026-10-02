@@ -7,8 +7,12 @@ from PySide6.QtWidgets import (
     QComboBox,
     QMessageBox,
     QVBoxLayout,
-    QHBoxLayout)
+    QHBoxLayout,
+    QProgressBar
+    )
 from ims_utils import load_ims
+from registration import PARAMETERS_FILES, run_elastix
+from metrics import evaluate_alignment
 
 class ImagePanel(QWidget):
     def __init__(self, title):
@@ -31,6 +35,7 @@ class ImagePanel(QWidget):
         self.layout.addWidget(self.file_label)
 
         self.browse_button.clicked.connect(self.choose_file)
+
         self.resolution_label = QLabel("Resolution Level:")
         self.layout.addWidget(self.resolution_label)
         self.resolution_box = QComboBox()
@@ -100,11 +105,73 @@ class ImagePanel(QWidget):
 
 def main():
 
+    output_path= None
+
+    def choose_output_dir():
+        nonlocal output_path
+
+        selected_path = QFileDialog.getExistingDirectory(
+            window,
+            "Choose output folder to save registration",
+            "")
+
+        if selected_path:
+            output_path = selected_path
+            file_output_label.setText(output_path)
+
+
+    def run_registration():
+        if fixed.volume is None or moving.volume is None:
+            QMessageBox.warning(window,
+                "Image not loaded",
+                "\nPlease load both fixed and moving images."
+                )
+            return
+
+        if output_path is None:
+            QMessageBox.warning(window,
+                                "Output directory not selected",
+                                "\nPlease select an output folder.")
+            return
+
+        transform_boxes=[transform_box_1,transform_box_2,transform_box_3]
+
+        parameters= []
+
+        for tran_box in transform_boxes:
+            transform= tran_box.currentText()
+
+            if transform != "None":
+                parameters.append(PARAMETERS_FILES[transform])
+
+        progress_bar.show()
+
+        aligned_volume,output_path_time= run_elastix(fixed.volume,moving.volume,parameters,output_path)
+        metrics= evaluate_alignment(fixed.volume, moving.volume, aligned_volume)
+
+        progress_bar.hide()
+
+        message = (
+            "Registration completed successfully!\n\n"
+            "Alignment Metrics:\n"
+            f"MAE:  {metrics['mae_before']:.2f}  →  {metrics['mae_after']:.2f}\n"
+            f"MSE:  {metrics['mse_before']:.2f}  →  {metrics['mse_after']:.2f}\n"
+            f"NCC:  {metrics['ncc_before']:.3f}  →  {metrics['ncc_after']:.3f}\n\n"
+            f"Results saved to:\n{output_path_time}"
+        )
+
+        QMessageBox.information(
+            window,
+            "Registration complete",
+            message
+        )
+
+
     app = QApplication([])
 
     window = QWidget()
     window.setWindowTitle("Image Registration Tool")
-    window.resize(900, 650)
+    window.resize(1200, 900)
 
     main_layout= QVBoxLayout()
 
@@ -118,15 +185,48 @@ def main():
 
     main_layout.addLayout(images_layout)
 
-    transform_label=QLabel("Transform Type:")
-    transform_box= QComboBox()
-    transform_box.addItems(["Translation","Rigid","Affine"])
+    transform_label_1=QLabel("Transform Type - Step 1:")
+    transform_box_1= QComboBox()
+    transform_box_1.addItems(["Translation","Rigid","Affine"])
 
-    main_layout.addWidget(transform_label)
-    main_layout.addWidget(transform_box)
+    main_layout.addWidget(transform_label_1)
+    main_layout.addWidget(transform_box_1)
+
+    transform_label_2=QLabel("Transform Type - Step 2:")
+    transform_box_2= QComboBox()
+    transform_box_2.addItems(["None","Translation","Rigid","Affine"])
+    
+    main_layout.addWidget(transform_label_2)
+    main_layout.addWidget(transform_box_2)
+
+    transform_label_3=QLabel("Transform Type - Step 3:")
+    transform_box_3= QComboBox()
+    transform_box_3.addItems(["None","Translation","Rigid","Affine"])
+    
+    main_layout.addWidget(transform_label_3)
+    main_layout.addWidget(transform_box_3)
+
+    output_path_label=QLabel("Output folder")
+    main_layout.addWidget(output_path_label)
+
+    browse_output_button = QPushButton("Browse")
+    main_layout.addWidget(browse_output_button)
+    
+    file_output_label = QLabel("No directory selected")
+    main_layout.addWidget(file_output_label)
+    
+    browse_output_button.clicked.connect(choose_output_dir)
 
     reg_bottom=QPushButton("Run Registration")
     main_layout.addWidget(reg_bottom)
+    reg_bottom.clicked.connect(run_registration)
+
+    progress_bar = QProgressBar()
+    progress_bar.setRange(0, 0)
+    progress_bar.hide()
+    main_layout.addWidget(progress_bar)
+
+
 
     window.setLayout(main_layout)
 
