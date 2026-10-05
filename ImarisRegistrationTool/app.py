@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QProgressBar
     )
+from PySide6.QtCore import QThread, Signal
 from ims_utils import load_ims
 from registration import PARAMETERS_FILES, run_elastix
 from metrics import evaluate_alignment
@@ -100,6 +101,26 @@ class ImagePanel(QWidget):
                 "Image too large",
                 str(error) + "\nPlease select a lower resolution level."
             )
+
+
+class RegistrationThread(QThread):
+
+    registration_finished = Signal(object, object)
+
+    def __init__(self, fix_vol, mov_vol, pars,out_path):
+        super().__init__()
+
+        self.fix_vol= fix_vol
+        self.mov_vol= mov_vol
+        self.pars= pars
+        self.out_path= out_path
+
+    def run(self):
+        ali_vol, out_time_path= run_elastix(self.fix_vol,self.mov_vol,self.pars,self.out_path)
+        self.registration_finished.emit(ali_vol,out_time_path)
+            
+
+        
         
 
 
@@ -146,11 +167,18 @@ def main():
 
         progress_bar.show()
 
-        aligned_volume,output_path_time= run_elastix(fixed.volume,moving.volume,parameters,output_path)
+        registration_thread = RegistrationThread(fixed.volume,
+                                            moving.volume,
+                                            parameters,
+                                            output_path)
+        registration_thread.registration_finished.connect(registration_finished)
+        
+
+    def registration_finished(aligned_volume, output_path_time):
         metrics= evaluate_alignment(fixed.volume, moving.volume, aligned_volume)
-
+        
         progress_bar.hide()
-
+        
         message = (
             "Registration completed successfully!\n\n"
             "Alignment Metrics:\n"
@@ -158,13 +186,14 @@ def main():
             f"MSE:  {metrics['mse_before']:.2f}  →  {metrics['mse_after']:.2f}\n"
             f"NCC:  {metrics['ncc_before']:.3f}  →  {metrics['ncc_after']:.3f}\n\n"
             f"Results saved to:\n{output_path_time}"
-        )
-
+            )
+        
         QMessageBox.information(
             window,
             "Registration complete",
             message
-        )
+            )
+
 
 
     app = QApplication([])
