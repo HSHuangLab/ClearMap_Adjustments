@@ -121,8 +121,6 @@ class RegistrationThread(QThread):
             
 
         
-        
-
 
 def main():
 
@@ -167,12 +165,18 @@ def main():
 
         progress_bar.show()
 
-        registration_thread = RegistrationThread(fixed.volume,
-                                            moving.volume,
-                                            parameters,
-                                            output_path)
-        registration_thread.registration_finished.connect(registration_finished)
-        
+        window.registration_thread = RegistrationThread(
+            fixed.volume,
+            moving.volume,
+            parameters,
+            output_path
+            )
+
+        window.registration_thread.registration_finished.connect(
+            registration_finished
+            )
+
+        window.registration_thread.start()
 
     def registration_finished(aligned_volume, output_path_time):
         metrics= evaluate_alignment(fixed.volume, moving.volume, aligned_volume)
