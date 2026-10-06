@@ -3,12 +3,15 @@ import subprocess
 import tifffile
 from datetime import datetime
 import numpy as np
-import platform
+import platform,sys
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if getattr(sys, 'frozen', False):
+    PROJECT_ROOT = Path(sys.executable).resolve().parent
+else:
+    PROJECT_ROOT = Path(__file__).resolve().parent[1]
 
 if platform.system() == "Windows":
-    ELASTIX_PATH = PROJECT_ROOT / "tools" / "elastix" / "windows"/ "bin" / "elastix.exe"
+    ELASTIX_PATH = PROJECT_ROOT / "tools" / "elastix" / "windows" / "elastix.exe"
 else:
     ELASTIX_PATH = PROJECT_ROOT / "tools" / "elastix" / "bin" / "elastix"
 
