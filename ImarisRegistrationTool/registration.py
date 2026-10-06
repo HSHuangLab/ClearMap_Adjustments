@@ -3,9 +3,14 @@ import subprocess
 import tifffile
 from datetime import datetime
 import numpy as np
+import platform
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-ELASTIX_PATH = PROJECT_ROOT / "tools" / "elastix" / "bin" / "elastix"
+
+if platform.system() == "Windows":
+    ELASTIX_PATH = PROJECT_ROOT / "tools" / "elastix" / "windows"/ "bin" / "elastix.exe"
+else:
+    ELASTIX_PATH = PROJECT_ROOT / "tools" / "elastix" / "bin" / "elastix"
 
 PARAMETERS_DIR= PROJECT_ROOT/ "ImarisRegistrationTool"/ "Parameters"
 
