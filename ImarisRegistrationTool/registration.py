@@ -8,7 +8,7 @@ import platform,sys
 if getattr(sys, 'frozen', False):
     PROJECT_ROOT = Path(sys.executable).resolve().parent
 else:
-    PROJECT_ROOT = Path(__file__).resolve().parent[1]
+    PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 if platform.system() == "Windows":
     ELASTIX_PATH = PROJECT_ROOT / "tools" / "elastix" / "windows" / "elastix.exe"
