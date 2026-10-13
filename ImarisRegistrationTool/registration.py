@@ -32,12 +32,51 @@ def read_transform_parameters(file_path):
 
     raise ValueError("TransformParameters not found")
 
-
-def run_elastix(fixed_vol, moving_vol, parameter_paths, output_parent):
+def validate_elastix():
     if not ELASTIX_PATH.is_file():
         raise FileNotFoundError(
-            f"Elastix executable not found: {ELASTIX_PATH}"
+            f"Elastix executable not found:\n{ELASTIX_PATH}"
         )
+
+    print(f"Checking Elastix executable: {ELASTIX_PATH}")
+
+    # Check the Windows executable format
+    if platform.system() == "Windows":
+        with open(ELASTIX_PATH, "rb") as f:
+            signature = f.read(2)
+
+        if signature != b"MZ":
+            raise RuntimeError(
+                "Invalid Elastix executable for Windows.\n"
+                f"File: {ELASTIX_PATH}\n\n"
+                "Expected a Windows .exe file. "
+                "Please install the Windows version of Elastix."
+            )
+
+    # Check whether the executable can actually start
+    try:
+        subprocess.run(
+            [str(ELASTIX_PATH), "--help"],
+            capture_output=True,
+            text=True,
+            timeout=15
+        )
+    except OSError as e:
+        raise RuntimeError(
+            f"Unable to launch Elastix:\n{ELASTIX_PATH}\n\n"
+            f"Original error: {e}\n\n"
+            "Verify that the executable matches your operating "
+            "system and processor architecture."
+        ) from e
+    except subprocess.TimeoutExpired as e:
+        raise RuntimeError(
+            "Elastix did not respond within 15 seconds."
+        ) from e
+
+    print("Elastix executable launched successfully.")
+
+def run_elastix(fixed_vol, moving_vol, parameter_paths, output_parent):
+    validate_elastix()
 
     if not parameter_paths:
         raise ValueError("At least one parameter file is required.")
@@ -71,7 +110,21 @@ def run_elastix(fixed_vol, moving_vol, parameter_paths, output_parent):
 
     command= command + ["-out", str(output_path)]
 
-    subprocess.run(command, check=True)
+    try:
+        subprocess.run(command, check=True)
+
+    except OSError as e:
+        raise RuntimeError(
+            f"Failed to launch Elastix.\n"
+            f"Executable: {ELASTIX_PATH}\n"
+            f"Original error: {e}"
+        ) from e
+
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(
+            f"Elastix registration failed with exit code {e.returncode}.\n"
+            f"Check the elastix.log file in:\n{output_path}"
+        ) from e
 
     aligned_vol = tifffile.imread(output_path / f"result.{len(parameter_paths)-1}.tif")
     return aligned_vol,output_path
