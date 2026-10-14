@@ -5,6 +5,7 @@ The Imaris Registration Tool is a graphical application for 3D microscopy image 
 The tool was developed as part of the ClearMap Adjustments project to provide a simple workflow for loading microscopy volumes, configuring registration steps, running Elastix, and evaluating the resulting alignment.
 
 ## Features
+## testing
 
 - Load Imaris (`.ims`) microscopy files
 - Select resolution level and image channel
