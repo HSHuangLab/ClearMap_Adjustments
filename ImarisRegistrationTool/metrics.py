@@ -20,21 +20,26 @@ def ncc (array1,array2):
 
     return numerator / denominator
 
-def evaluate_alignment (fixed,moving,aligned):
-        mae_fixed_moving=mae(fixed,moving)
-        mae_fixed_aligned=mae(fixed,aligned)
+def evaluate_alignment(fixed, moving, aligned):
 
-        mse_fixed_moving = mse(fixed, moving)
-        mse_fixed_aligned = mse(fixed, aligned)
+    if fixed.shape != aligned.shape:
+        raise ValueError(
+            f"Fixed and aligned volumes have different shapes: "
+            f"{fixed.shape} vs {aligned.shape}"
+        )
 
-        ncc_fixed_moving=ncc(fixed,moving)
-        ncc_fixed_aligned=ncc(fixed,aligned)
+    results = {
+        "mae_before": None,
+        "mse_before": None,
+        "ncc_before": None,
+        "mae_after": mae(fixed, aligned),
+        "mse_after": mse(fixed, aligned),
+        "ncc_after": ncc(fixed, aligned),
+    }
 
-        return {
-    "mae_before": mae_fixed_moving,
-    "mae_after": mae_fixed_aligned,
-    "mse_before": mse_fixed_moving,
-    "mse_after": mse_fixed_aligned,
-    "ncc_before": ncc_fixed_moving,
-    "ncc_after": ncc_fixed_aligned
-}
+    if fixed.shape == moving.shape:
+        results["mae_before"] = mae(fixed, moving)
+        results["mse_before"] = mse(fixed, moving)
+        results["ncc_before"] = ncc(fixed, moving)
+
+    return results

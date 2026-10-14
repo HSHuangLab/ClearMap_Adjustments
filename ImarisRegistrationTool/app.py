@@ -179,25 +179,42 @@ def main():
         window.registration_thread.start()
 
     def registration_finished(aligned_volume, output_path_time):
-        metrics= evaluate_alignment(fixed.volume, moving.volume, aligned_volume)
-        
+        metrics = evaluate_alignment(
+            fixed.volume,
+            moving.volume,
+            aligned_volume
+        )
+
         progress_bar.hide()
-        
+
+        def format_metric(value, decimals=2):
+            if value is None:
+                return "N/A"
+            return f"{value:.{decimals}f}"
+
         message = (
             "Registration completed successfully!\n\n"
             "Alignment Metrics:\n"
-            f"MAE:  {metrics['mae_before']:.2f}  →  {metrics['mae_after']:.2f}\n"
-            f"MSE:  {metrics['mse_before']:.2f}  →  {metrics['mse_after']:.2f}\n"
-            f"NCC:  {metrics['ncc_before']:.3f}  →  {metrics['ncc_after']:.3f}\n\n"
+            f"MAE:  {format_metric(metrics['mae_before'])}  →  "
+            f"{format_metric(metrics['mae_after'])}\n"
+            f"MSE:  {format_metric(metrics['mse_before'])}  →  "
+            f"{format_metric(metrics['mse_after'])}\n"
+            f"NCC:  {format_metric(metrics['ncc_before'], 3)}  →  "
+            f"{format_metric(metrics['ncc_after'], 3)}\n\n"
             f"Results saved to:\n{output_path_time}"
+        )
+
+        if fixed.volume.shape != moving.volume.shape:
+            message += (
+                "\n\nNote: Before-registration metrics are unavailable "
+                "because the input volumes have different dimensions."
             )
-        
+
         QMessageBox.information(
             window,
             "Registration complete",
             message
-            )
-
+        )
 
 
     app = QApplication([])
